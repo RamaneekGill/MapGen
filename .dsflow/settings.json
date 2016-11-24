@@ -1,0 +1,13 @@
+{
+  "default_metric": null,
+  "default_model": null,
+  "default_raw_data": null,
+  "default_test_data": null,
+  "default_training_data": null,
+  "default_transformer": null,
+  "default_validation_data": null,
+  "enable_history": true,
+  "enable_prompt": true,
+  "metrics_supported": null,
+  "skip_validations": false
+}
