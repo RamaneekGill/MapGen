@@ -10,6 +10,7 @@ import io
 import sys
 import requests
 from PIL import Image
+from time import sleep
 from random import uniform as random_float
 
 def preproccess(bytes_data):
@@ -60,6 +61,9 @@ if __name__ == '__main__':
 	default_params = '&zoom=16&size=200x230&sensor=false&style=feature:all|element:labels|visibility:off'
 
 	for i in range(1, num_images+1):
+		# Sleep every 0.5 seconds so we don't get throttled
+		sleep(0.5)
+
 		local_latitude = random_float(min_latitude, max_latitude)
 		local_longitude = random_float(min_longitude, max_longitude)
 
