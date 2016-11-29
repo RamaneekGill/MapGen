@@ -1,0 +1,9 @@
+create define_G_unet
+
+create basic discriminator (defineD_basic)
+	input_nc = 3, this is used when conditioning
+	else when unconditioned input_nc = 0
+
+
+
+To condition a GAN stack the ground truth on the input image and feed to discriminator
