@@ -1,67 +1,131 @@
 import settings
+from keras.models import Model
+from keras.layers import Input, merge, Convolution2D, Deconvolution2D, Activation
+from keras.optimizers import Adam
+from keras.layers.core import Dropout
+from keras.layers.advanced_activations import LeakyReLU
+from keras.layers.normalization import BatchNormalization
+from keras import backend as K
 
 def load_model(path):
 	# Implement a function that loads data that the transformer saved
 	# return data
 	pass
 
+
 def save_model(model, path):
 	# Implement a function that saves a model to path
 	pass
 
+
 def create_model(**kwargs):
-	# Implement a function that creates a model and returns it
-	# return model
+	K.set_image_dim_ordering('th') # use theano dimension ordering
+
 	image_width = kwargs.get('image_width', settings.image_width)
 	image_height = kwargs.get('image_height', settings.image_height)
 	kernel_width = kwargs.get('kernel_width', settings.kernel_width)
 	kernel_height = kwargs.get('kernel_height', settings.kernel_height)
 	kernel_stride = kwargs.get('kernel_stride', settings.kernel_stride)
 	padding = kwargs.get('padding', settings.padding)
+	pool_size = kwargs.get('pool_size', settings.pool_size)
 	relu_alpha = kwargs.get('relu_alpha', settings.relu_alpha)
+	dropout_probability = kwargs.get('dropout_probability', settings.dropout_probability)
 
 	num_input_channels = kwargs.get('num_input_channels', settings.num_input_channels)
 	num_generator_channels = kwargs.get('num_generator_channels', settings.num_generator_channels)
 
+	##### GENERATOR
+	generator_input = Input(shape=(num_input_channels, image_width, image_height))
 
-	# Unconditioned GAN inputs will be num_channels x image_width x image_height
-	generator = Convolution2D(input_shape=(num_input_channels, image_width, image_height),
-		                      nb_filter=num_generator_channels, 
-		                      nb_row=kernel_width, nb_col=kernel_height, 
-		                      subsample=(kernel_stride, kernel_stride))
-	generator = ZeroPadding2D(padding=(padding, padding))(generator)
-	generator = LeakyReLU(alpha=relu_alpha)(generator)
-	# Output is num_generator_channels x image_width x image_height
+	### BLOCK 1
+	generator_1 = Convolution2D(nb_filter=num_generator_channels, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_input)
+	generator_1 = BatchNormalization()(generator_1)
+	# Output is num_generator_channels x image_width/2 x image_height/2 
 
+
+	### BLOCK 2
 	filter_multiplier = 2 # used to increase the number of convolutional filters to use
+	generator_2 = LeakyReLU(alpha=relu_alpha)(generator_1)
+	generator_2 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_2)
+	generator_2 = BatchNormalization()(generator_2)
+	# Output is num_generator_channels*2 x image_width/4 x image_height/4
 
-	generator = Convolution2D(input_shape=(num_generator_channels, image_width, image_height),
-		                      nb_filter=num_generator_channels * filter_multiplier, 
-		                      nb_row=kernel_width, nb_col=kernel_height, 
-		                      subsample=(kernel_stride, kernel_stride))(generator)
-	generator = ZeroPadding2D(padding=(padding, padding))(generator)
-	generator = BatchNormalization()(generator)
-	generator = LeakyReLU(alpha=relu_alpha)(generator)
+	### BLOCK 3
+	filter_multiplier = 4
+	generator_3 = LeakyReLU(alpha=relu_alpha)(generator_2)
+	generator_3 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_3)
+	generator_3 = BatchNormalization()(generator_3)
+	# Output is num_generator_channels*4 x image_width/8 x image_height/8
+
+	### BLOCK 4
+	filter_multiplier = 8
+	generator_4 = LeakyReLU(alpha=relu_alpha)(generator_3)
+	generator_4 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_4)
+	generator_4 = BatchNormalization()(generator_4)
+	# Output is num_generator_channels*8 x image_width/16 x image_height/16
+
+	### BLOCK 5
+	filter_multiplier = 8
+	generator_5 = LeakyReLU(alpha=relu_alpha)(generator_4)
+	generator_5 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_5)
+	generator_5 = BatchNormalization()(generator_5)
+	# Output is num_generator_channels*8 x image_width/32 x image_height/32
 
 
-	# nn.SpatialConvolution(nInputPlane, nOutputPlane, kW, kH, [dW], [dH], [padW], [padH])
+	### BLOCK 6
+	filter_multiplier = 8
+	generator_6 = LeakyReLU(alpha=relu_alpha)(generator_5)
+	generator_6 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_6)
+	generator_6 = BatchNormalization()(generator_6)
+	# Output is num_generator_channels*8 x image_width/64 x image_height/64
 
-#    # e1 = - nn.SpatialConvolution(input_nc, ngf, 4, 4, 2, 2, 1, 1)
-#    # -- input is (ngf) x 128 x 128
-#    # e2 = e1 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf, ngf * 2, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 2)
-    # -- input is (ngf * 2) x 64 x 64
-    # e3 = e2 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf * 2, ngf * 4, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 4)
-    # -- input is (ngf * 4) x 32 x 32
-    # e4 = e3 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf * 4, ngf * 8, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 8)
-    # -- input is (ngf * 8) x 16 x 16
-    # e5 = e4 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf * 8, ngf * 8, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 8)
-    # -- input is (ngf * 8) x 8 x 8
-    # e6 = e5 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf * 8, ngf * 8, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 8)
-    # -- input is (ngf * 8) x 4 x 4
-    # e7 = e6 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf * 8, ngf * 8, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 8)
-    # -- input is (ngf * 8) x 2 x 2
-    # e8 = e7 - nn.LeakyReLU(0.2, true) - nn.SpatialConvolution(ngf * 8, ngf * 8, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 8)
-    # -- input is (ngf * 8) x 1 x 1
+
+	### BLOCK 7
+	filter_multiplier = 8
+	generator_7 = LeakyReLU(alpha=relu_alpha)(generator_6)
+	generator_7 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=kernel_width, nb_col=kernel_height, border_mode='same', 
+		                        subsample=(kernel_stride, kernel_stride))(generator_7)
+	generator_7 = BatchNormalization()(generator_7)
+	# Output is num_generator_channels*8 x image_width/128 x image_height/128
+
+
+	### BLOCK 8
+	filter_multiplier = 8
+	generator_8 = LeakyReLU(alpha=relu_alpha)(generator_7)
+	generator_8 = Convolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                        nb_row=1, nb_col=1, border_mode='same',
+		                        # tensorflow errors when kernel size > input size
+		                        subsample=(kernel_stride, kernel_stride))(generator_8)
+	generator_8 = BatchNormalization()(generator_8)
+	# Output is num_generator_channels*8 x image_width/256 x image_height/256
+
+	##### DISCRIMINATOR
+
+	### BLOCK 1
+	_discriminator_1 = Activation('relu')(generator_8)
+	output_width = int(image_width / 2**7)
+	output_height = int(image_height / 2**7)
+	output_shape = (batch_size, output_width, output_height, num_generator_channels * filter_multiplier)
+	_discriminator_1 = Deconvolution2D(nb_filter=num_generator_channels * filter_multiplier, 
+		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               output_shape=output_shape,
+		                               subsample=(kernel_stride, kernel_stride))(_discriminator_1)
+	_discriminator_1 = BatchNormalization()(_discriminator_1)
+	_discriminator_1 = Dropout(dropout_probability)(_discriminator_1)
+	# Output is num_generator_channels*8 x image_width/128 x image_height/128
     
     # d1_ = e8 - nn.ReLU(true) - nn.SpatialFullConvolution(ngf * 8, ngf * 8, 4, 4, 2, 2, 1, 1) - nn.SpatialBatchNormalization(ngf * 8) - nn.Dropout(0.5)
     # -- input is (ngf * 8) x 2 x 2
