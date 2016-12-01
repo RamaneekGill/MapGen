@@ -9,11 +9,9 @@ def load_data(path):
     map_arr = []
 
     i = 0
-    j = 0
     while i < len(fn):
         split = fn[i].split('_')
         if split[1] == 'map':
-            j += 1
             filename = os.path.join(path, fn[i])
             map_arr.append(io.imread(filename))
             split[1] = 'satellite'
