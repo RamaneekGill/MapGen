@@ -18,10 +18,46 @@ def save_model(model, path):
 	pass
 
 
+def create_model(**kwargs):
+	image_width = kwargs.get('image_width', settings.image_width)
+	image_height = kwargs.get('image_height', settings.image_height)
+	num_input_channels = kwargs.get('num_input_channels', settings.num_input_channels)
+
+	generator = create_generator(**kwargs)
+	discriminator = create_discriminator(**kwargs)
+
+	gan_input = Input(shape=(num_input_channels, image_width, image_height))
+	H = generator(gan_input)
+	gan_V = discriminator(H)
+	GAN = Model(gan_input, gan_V)
+
+	loss = kwargs.get('loss', settings.loss)
+	metrics = kwargs.get('metrics', settings.metrics)
+	optimizer = kwargs.get('optimizer', settings.optimizer)
+	learning_rate = kwargs.get('learning_rate', settings.learning_rate)
+
+	# For custom loss and metrics functions
+	if loss == 'dice_coef_loss':
+		loss = dice_coef_loss
+
+	if metrics == ['dice_coef']:
+		metrics = [dice_coef]
+
+	if optimizer == 'adam':
+		optimizer = Adam(lr=learning_rate, beta_1=kwargs.get('beta_1', settings.beta_1))
+
+	GAN.compile(loss=loss, optimizer=optimizer)
+	GAN.summary()
+
+	return GAN
+
+
 def create_generator(**kwargs):
 	image_width = kwargs.get('image_width', settings.image_width)
 	image_height = kwargs.get('image_height', settings.image_height)
 	num_input_channels = kwargs.get('num_input_channels', settings.num_input_channels)
+	num_output_channels = kwargs.get('num_output_channels', None)
+	batch_size = kwargs.get('batch_size', settings.batch_size)
 	num_kernels = kwargs.get('num_kernels', settings.num_kernels)
 	kernel_width = kwargs.get('kernel_width', settings.kernel_width)
 	kernel_height = kwargs.get('kernel_height', settings.kernel_height)
@@ -270,6 +306,8 @@ def create_generator(**kwargs):
 
 
 def create_discriminator(**kwargs):
+	image_width = kwargs.get('image_width', settings.image_width)
+	image_height = kwargs.get('image_height', settings.image_height)
 	num_kernels = kwargs.get('num_kernels', settings.num_kernels)
 	kernel_width = kwargs.get('kernel_width', settings.kernel_width)
 	kernel_height = kwargs.get('kernel_height', settings.kernel_height)

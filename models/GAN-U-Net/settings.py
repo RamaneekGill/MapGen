@@ -26,13 +26,9 @@ kernel_width = 4
 
 kernel_stride = 2
 
-padding = 1
-
 relu_alpha = 0.2 # for LeakyReLU
 
 dropout_probability = 0.5
-
-pool_size = 2
 
 loss = 'dice_coef_loss'
 
