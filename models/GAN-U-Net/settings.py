@@ -2,19 +2,17 @@ random_seed = 1337
 
 dropout_rate = 0.1
 
-learning_rate = 0.001
+learning_rate = 1e-5
 
 batch_size = 1
 
-num_generator_channels = 64
-
-num_discriminator_channels = 64
+num_kernels = 64
 
 num_input_channels = 3
 
 num_output_channels = 3
 
-beta1 = 0.5 # beta for Adam optimizer
+beta_1 = 0.5 # beta for Adam optimizer
 
 lamda = 100 # weight for L1 regularization
 
@@ -35,3 +33,9 @@ relu_alpha = 0.2 # for LeakyReLU
 dropout_probability = 0.5
 
 pool_size = 2
+
+loss = 'dice_coef_loss'
+
+optimizer = 'adam'
+
+metrics = ['dice_coef']
