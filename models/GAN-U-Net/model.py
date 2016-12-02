@@ -152,7 +152,7 @@ def create_generator(**kwargs):
 	_decoder_1 = Activation('relu')(encoder_8)
 	output_shape = (batch_size, num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_1 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-	                                   nb_row=kernel_width, nb_col=kernel_height,
+	                                   nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 	                                   output_shape=output_shape,
 	                                   subsample=(kernel_stride, kernel_stride))(_decoder_1)
 	_decoder_1 = BatchNormalization(axis=1)(_decoder_1)
@@ -168,7 +168,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_2 = Activation('relu')(decoder_1)
 	_decoder_2 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_2)
 	_decoder_2 = BatchNormalization()(_decoder_2)
@@ -183,7 +183,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_3 = Activation('relu')(decoder_2)
 	_decoder_3 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_3)
 	_decoder_3 = BatchNormalization()(_decoder_3)
@@ -198,7 +198,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_4 = Activation('relu')(decoder_3)
 	_decoder_4 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_4)
 	_decoder_4 = BatchNormalization()(_decoder_4)
@@ -214,7 +214,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_5 = Activation('relu')(decoder_4)
 	_decoder_5 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_5)
 	_decoder_5 = BatchNormalization()(_decoder_5)
@@ -230,7 +230,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_6 = Activation('relu')(decoder_5)
 	_decoder_6 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_6)
 	_decoder_6 = BatchNormalization()(_decoder_6)
@@ -246,7 +246,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_7 = Activation('relu')(decoder_6)
 	_decoder_7 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_7)
 	_decoder_7 = BatchNormalization()(_decoder_7)
@@ -262,7 +262,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_kernels * filter_multiplier, output_width, output_height)
 	_decoder_7 = Activation('relu')(decoder_6)
 	_decoder_7 = Deconvolution2D(nb_filter=num_kernels * filter_multiplier, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(_decoder_7)
 	_decoder_7 = BatchNormalization()(_decoder_7)
@@ -277,7 +277,7 @@ def create_generator(**kwargs):
 	output_shape = (batch_size,  num_output_channels, output_width, output_height)
 	decoder_8 = Activation('relu')(decoder_7)
 	decoder_8 = Deconvolution2D(nb_filter=num_output_channels, 
-		                               nb_row=kernel_width, nb_col=kernel_height,
+		                               nb_row=kernel_width, nb_col=kernel_height, border_mode='same',
 		                               output_shape=output_shape,
 		                               subsample=(kernel_stride, kernel_stride))(decoder_8)
 	# Output is num_output_channels x image_width x image_height

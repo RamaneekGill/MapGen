@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import settings
 from PIL import Image
 from skimage import io, color
 
@@ -57,6 +58,8 @@ def train(model, training_data, validation_data, **kwargs):
     x_train = training_data[0]
     y_train = training_data[1]
 
+    batch_size = kwargs.get('batch_size', settings.batch_size)
+
     # model is the GAN itself
     generator = model.layers[1]
     discriminator = model.layers[2]
@@ -64,13 +67,16 @@ def train(model, training_data, validation_data, **kwargs):
     
     for epoch in range(100):
         print("Epoch is", epoch)
-        print("Number of batches", int(x_train.shape[0]/batch_size))
+        print("Number of batches", int(x_train.shape[0] / batch_size))
 
         # for each batch
-        for index in range(int(x_train.shape[0]/batch_size)):
+        for index in range(int(x_train.shape[0] / batch_size)):
 
             x_image_batch = x_train[index*batch_size:(index+1)*batch_size]
             y_image_batch = y_train[index*batch_size:(index+1)*batch_size]
+            generator.summary()
+            # for i in range(len(generator.layers)):
+            #     print(i, generator.layers[i], generator.layers[i].input_shape, generator.layers[i].output_shape)
             generated_images = generator.predict(x_image_batch, verbose=1)
             # if conditional GAN:
             #   generated_images = concat(generated_imgages, y_image_batch)
@@ -125,7 +131,7 @@ def deprocess(image):
 def combine_images(generated_images):
     num = generated_images.shape[0]
     width = int(math.sqrt(num))
-    height = int(math.ceil(float(num)/width))
+    height = int(math.ceil(float(num) / width))
     shape = generated_images.shape[2:]
     image = np.zeros((height*shape[0], width*shape[1]),
                      dtype=generated_images.dtype)
