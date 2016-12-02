@@ -1,28 +1,57 @@
 import os
 import numpy as np
-from skimage import io
 from PIL import Image
+from skimage import io, color
 
 def load_data(path):
     path = os.path.join(os.path.dirname(path), 'raw')
     file_names = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    num_pairs = int(len(file_names) / 2)
 
-    sat_arr = []
-    map_arr = []
+    print('loading ', len(file_names), ' images, ', num_pairs, 'pairs')
 
-    print('loading data')
-    for filename in file_names:
+    sat_arr = np.zeros((num_pairs, 3, 256, 256))
+    map_arr = np.zeros((num_pairs, 3, 256, 256))
+
+    for i in range(len(file_names)):
+
+        filename = file_names[i]
+
         if not filename.endswith('.png'):
-            print('not png')
-            continue
-        if 'map' in filename:
-            fp = os.path.join(path, filename)
-            map_arr.append(io.imread(fp))
-        elif 'satellite' in filename:
-            fp = os.path.join(path, filename)
-            sat_arr.append(io.imread(fp))
+            print('not png array size will be incorrect')
+            print('please remove non images from the directory: ', path)
+            exit()
 
-    return [sat_arr, map_arr]
+        fp = os.path.join(path, filename)
+        im = io.imread(fp)
+
+        # If im.shape is not 3D (happens when image is just black and white)
+        if len(im.shape) != 3:
+            im = color.gray2rgb(im)
+
+        # Convert RGBA to RGB
+        if im.shape == (256, 256, 4):
+            print('found rgba image please remove the pair from the directory...')
+            print(filename)
+            exit()
+            
+
+        # make shape (256, 256, 3) into (3, 256, 256)
+        if im.shape == (256, 256, 3):
+            # (a, b, c) -> (b, a, c)
+            im = np.swapaxes(im, 0, 1)
+            # (b, a, c) -> (c, a, b)
+            im = np.swapaxes(im, 0, 2)
+
+        if 'map' in filename:
+            map_arr[int(i/2)] = im
+        elif 'satellite' in filename:
+            sat_arr[int(i/2)] = im
+        
+
+    print('done loading data')
+
+    return np.array([sat_arr, map_arr])
 
 def train(model, training_data, validation_data, **kwargs):
     x_train = training_data[0]
