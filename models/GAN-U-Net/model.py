@@ -56,7 +56,7 @@ def create_generator(**kwargs):
 	image_width = kwargs.get('image_width', settings.image_width)
 	image_height = kwargs.get('image_height', settings.image_height)
 	num_input_channels = kwargs.get('num_input_channels', settings.num_input_channels)
-	num_output_channels = kwargs.get('num_output_channels', None)
+	num_output_channels = kwargs.get('num_output_channels', settings.num_output_channels)
 	batch_size = kwargs.get('batch_size', settings.batch_size)
 	num_kernels = kwargs.get('num_kernels', settings.num_kernels)
 	kernel_width = kwargs.get('kernel_width', settings.kernel_width)
