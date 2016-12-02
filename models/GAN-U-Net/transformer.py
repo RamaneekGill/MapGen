@@ -5,27 +5,6 @@ from matplotlib import pyplot as plt
 from PIL import Image
 from scipy import ndimage
 
-def read_data(path):
-	# Implement a function that reads data
-	# return data
-    fn = os.listdir(path)
-    fn.sort()
-    sat_arr = []
-    map_arr = []
-
-    i = 0
-    while i < len(fn):
-        split = fn[i].split('_')
-        if split[1] == 'map':
-            filename = os.path.join(path, fn[i])
-            map_arr.append(io.imread(filename))
-        else:
-            filename = os.path.join(path, fn[i])
-            sat_arr.append(io.imread(filename))
-        i += 1
-
-    return [sat_arr, map_arr]
-
 def gradient_magnitude(filename, sigma):
     img = np.array(Image.open(filename).convert('L'))
 
@@ -75,6 +54,7 @@ def save_canny_dector(inputdir, outputdir):
             img = np.array(Image.open(filename).convert("RGB"))
             edges = cv2.Canny(img, 50, 300) # 30, 300 is good threshhold
             split[1] = 'canny'
+            edges = Image.fromarray(np.array(edges))
             edges.save(os.path.join(outputdir, '_'.join(split)))
             # Uncomment for side by side images 
             # plt.subplot(121)
@@ -99,6 +79,7 @@ def save_k_cluster(inputdir, outputdir):
         split = fn[i].split('_')
         filename = os.path.join(inputdir, fn[i])
         if split[1] == 'satellite':
+            split[1] = 'kcluster'
             img = np.array(Image.open(filename).convert("RGB"))
             Z = img.reshape((-1,3))
             # convert to np.float32
@@ -110,22 +91,23 @@ def save_k_cluster(inputdir, outputdir):
             center = np.uint8(center)
             result = center[label.flatten()]
             result = result.reshape((img.shape))
-
+            result = Image.fromarray(result)
+            result.save(os.path.join(outputdir, '_'.join(split)))
             # Uncomment for side by side images 
-            plt.subplot(121)
-            plt.imshow(img, cmap = 'gray')
-            plt.title('Original Image') 
-            plt.xticks([])
-            plt.yticks([])
-            plt.subplot(122)
-            plt.imshow(result, cmap = 'gray')
-            plt.title('k = ' + str(K) + ' Cluster Image')
-            plt.xticks([])
-            plt.yticks([])
-            plt.show()
-        # else:
-        #     img = Image.fromarray(np.array(Image.open(filename).convert("RGB"))).convert("RGB")
-        #     img.save(os.path.join(outputdir, fn[i]))
+            # plt.subplot(121)
+            # plt.imshow(img, cmap = 'gray')
+            # plt.title('Original Image') 
+            # plt.xticks([])
+            # plt.yticks([])
+            # plt.subplot(122)
+            # plt.imshow(result, cmap = 'gray')
+            # plt.title('k = ' + str(K) + ' Cluster Image')
+            # plt.xticks([])
+            # plt.yticks([])
+            # plt.show()
+        else:
+            img = Image.fromarray(np.array(Image.open(filename).convert("RGB"))).convert("RGB")
+            img.save(os.path.join(outputdir, fn[i]))
 
 def save_harrison_corner(inputdir, outputdir):
     pass
@@ -133,8 +115,8 @@ def save_harrison_corner(inputdir, outputdir):
 def save_sift(inputdir, outputdir):
     pass
 
-#save_magnitudes('../../data/raw/', '../../data/transformed/magnitude')
-#save_canny_dector('../../data/raw/', '../../data/transformed/canny detector')
+save_magnitudes('../../data/raw/', '../../data/transformed/magnitude')
+save_canny_dector('../../data/raw/', '../../data/transformed/canny detector')
 save_k_cluster('../../data/raw/', '../../data/transformed/k-cluster')
 
 
