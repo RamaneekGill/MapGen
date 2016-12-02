@@ -1,30 +1,32 @@
 import os
+import numpy as np
 from skimage import io
+from PIL import Image
 
 def load_data(path):
-	# Implement a function that loads data that the transformer saved
-	# return data
-    fn = os.listdir(path)
+    path = os.path.join(os.path.dirname(path), 'raw')
+    file_names = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
     sat_arr = []
     map_arr = []
 
-    i = 0
-    while i < len(fn):
-        split = fn[i].split('_')
-        if split[1] == 'map':
-            filename = os.path.join(path, fn[i])
-            map_arr.append(io.imread(filename))
-            split[1] = 'satellite'
-            filename = os.path.join(path, '_'.join(split))
-            sat_arr.append(io.imread(filename))
-        i += 1
+    print('loading data')
+    for filename in file_names:
+        if not filename.endswith('.png'):
+            print('not png')
+            continue
+        if 'map' in filename:
+            fp = os.path.join(path, filename)
+            map_arr.append(io.imread(fp))
+        elif 'satellite' in filename:
+            fp = os.path.join(path, filename)
+            sat_arr.append(io.imread(fp))
 
     return [sat_arr, map_arr]
 
 def train(model, training_data, validation_data, **kwargs):
-    (x_train, y_train), (X_test, y_test) = mnist.load_data()
-    x_train = (x_train.astype(np.float32) - 127.5)/127.5
-    x_train = x_train.reshape((x_train.shape[0], 1) + x_train.shape[1:])
+    x_train = training_data[0]
+    y_train = training_data[1]
 
     # model is the GAN itself
     generator = model.layers[1]
@@ -73,11 +75,23 @@ def train(model, training_data, validation_data, **kwargs):
             str(epoch)+"_"+str(index)+".png")
 
 
+def get_metrics(model, data):
+    # Implement a function that computes metrics given a trained model
+    # and dataset and returns a dictionary containing the metrics
+    # the dictionary should not be nested
+    # metrics = {}
+
+    # return metrics
+    pass
+
+
 def process(image):
     return image
 
+
 def deprocess(image):
     return image
+
 
 def combine_images(generated_images):
     num = generated_images.shape[0]
@@ -94,22 +108,9 @@ def combine_images(generated_images):
     return image
 
 
-
-
-
 def make_trainable(net, val):
     ''' Make the layers in the model trainable or non-trainable '''
     net.trainable = val
     for l in net.layers:
         l.trainable = val
 
-
-def get_metrics(model, data):
-	# Implement a function that computes metrics given a trained model
-	# and dataset and returns a dictionary containing the metrics
-	# the dictionary should not be nested
-	# metrics = {}
-
-	# return metrics
-
-	pass
