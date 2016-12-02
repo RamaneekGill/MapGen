@@ -1,27 +1,6 @@
-import os
-from skimage import io
+from PIL import Image
 
-def load_data(path):
-	# Implement a function that loads data that the transformer saved
-	# return data
-    fn = os.listdir(path)
-    sat_arr = []
-    map_arr = []
-
-    i = 0
-    while i < len(fn):
-        split = fn[i].split('_')
-        if split[1] == 'map':
-            filename = os.path.join(path, fn[i])
-            map_arr.append(io.imread(filename))
-            split[1] = 'satellite'
-            filename = os.path.join(path, '_'.join(split))
-            sat_arr.append(io.imread(filename))
-        i += 1
-
-    return [sat_arr, map_arr]
-
-def train(model, training_data, validation_data, **kwargs):
+def train():
     (x_train, y_train), (X_test, y_test) = mnist.load_data()
     x_train = (x_train.astype(np.float32) - 127.5)/127.5
     x_train = x_train.reshape((x_train.shape[0], 1) + x_train.shape[1:])
@@ -40,13 +19,13 @@ def train(model, training_data, validation_data, **kwargs):
 
             x_image_batch = x_train[index*batch_size:(index+1)*batch_size]
             y_image_batch = y_train[index*batch_size:(index+1)*batch_size]
-            generated_images = generator.predict(x_image_batch, verbose=1)
+            generated_images = generator.predict(x_image_batch, verbose=0)
             # if conditional GAN:
             #   generated_images = concat(generated_imgages, y_image_batch)
 
             # These two lines below are for debugging
-            # predict_real_images = discriminator.predict(y_image_batch, verbose=1)
-            # predict_fake_images = discriminator.predict(generated_images, verbose=1)
+            # predict_real_images = discriminator.predict(y_image_batch, verbose=0)
+            # predict_fake_images = discriminator.predict(generated_images, verbose=0)
 
             # Train discriminator
             make_trainable(discriminator, True)
@@ -95,21 +74,3 @@ def combine_images(generated_images):
 
 
 
-
-
-def make_trainable(net, val):
-    ''' Make the layers in the model trainable or non-trainable '''
-    net.trainable = val
-    for l in net.layers:
-        l.trainable = val
-
-
-def get_metrics(model, data):
-	# Implement a function that computes metrics given a trained model
-	# and dataset and returns a dictionary containing the metrics
-	# the dictionary should not be nested
-	# metrics = {}
-
-	# return metrics
-
-	pass
