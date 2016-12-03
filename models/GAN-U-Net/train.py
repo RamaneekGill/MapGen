@@ -1,6 +1,8 @@
 import os
-import numpy as np
+import utils
+import random
 import settings
+import numpy as np
 from PIL import Image
 from skimage import io, color
 
@@ -60,43 +62,55 @@ def train(model, training_data, validation_data, **kwargs):
 
     batch_size = kwargs.get('batch_size', settings.batch_size)
 
-    # model is the GAN itself
-    generator = model.layers[1]
-    discriminator = model.layers[2]
-    make_trainable(discriminator, False)
+    # model is [GAN, generator, discriminator]
+    GAN = model
+    generator = GAN.layers[1]
+    discriminator = GAN.layers[2]
     
+    # Pre-train the discriminator
+    print('pre-training the discriminator')
+    num_images = batch_size
+    splice = random.sample(range(0, x_train.shape[0]), num_images)
+    XT = x_train[splice, :, :, :]
+    YT = y_train[splice, :, :, :]
+    generated_images = generator.predict(XT)
+    y_fake = np.array([0] * num_images).astype('float')
+    y_real = np.array([1] * batch_size).astype('float')
+    y = np.concatenate((y_fake, y_real))
+    x = np.concatenate((generated_images, YT))
+    utils.make_trainable(discriminator, True)
+    utils.make_trainable(generator, True)
+    GAN.fit(x, y, nb_epoch=1, batch_size=batch_size, verbose=1)
+
+    # Train the GAN
     for epoch in range(100):
         print("Epoch is", epoch)
         print("Number of batches", int(x_train.shape[0] / batch_size))
 
-        # for each batch
         for index in range(int(x_train.shape[0] / batch_size)):
-
             x_image_batch = x_train[index*batch_size:(index+1)*batch_size]
             y_image_batch = y_train[index*batch_size:(index+1)*batch_size]
-            generator.summary()
-            # for i in range(len(generator.layers)):
-            #     print(i, generator.layers[i], generator.layers[i].input_shape, generator.layers[i].output_shape)
-            generated_images = generator.predict(x_image_batch, verbose=1)
+
             # if conditional GAN:
-            #   generated_images = concat(generated_imgages, y_image_batch)
+            #   generated_images = concat(generated_images, y_image_batch)
 
-            # These two lines below are for debugging
-            # predict_real_images = discriminator.predict(y_image_batch, verbose=1)
-            # predict_fake_images = discriminator.predict(generated_images, verbose=1)
+            # Train discriminator, generator weights are frozen
+            generated_images = generator.predict(x_image_batch, verbose=1)
+            utils.make_trainable(discriminator, True)
+            utils.make_trainable(generator, False)
+            y_fake = np.array([0] * batch_size).astype('float')
+            y_real = np.array([1] * batch_size).astype('float')
+            d_loss = GAN.train_on_batch(generated_images, y_fake)
+            d_loss += GAN.train_on_batch(y_image_batch, y_real)
 
-            # Train discriminator
-            make_trainable(discriminator, True)
-            x = np.concatenate((y_image_batch, generated_images))
-            y = [1] * batch_size + [0] * batch_size
-            d_loss = discriminator.train_on_batch(x, y)
-            print("batch %d d_loss : %f" % (index, d_loss))
-            make_trainable(discriminator, False)
-
-            # Train generator
-            g_loss = model.train_on_batch(
-                x_image_batch, [1] * batch_size)
-            print("batch %d g_loss : %f" % (index, g_loss))
+            # Train generator, discriminator weights are frozen
+            utils.make_trainable(discriminator, False)
+            utils.make_trainable(generator, True)
+            # g_loss = GAN.train_on_batch(generated_images, y_fake)
+            g_loss = GAN.train_on_batch(x_image_batch, y_real)
+            # g_loss /= 2
+            # g_loss = generator.train_on_batch(x_image_batch, y_image_batch)
+            print("batch %d \t d_loss %f \t g_loss : %f" % (index, d_loss, g_loss))
 
             # Save weights every 9 indexes
             if index % 10 == 9:
@@ -141,11 +155,4 @@ def combine_images(generated_images):
         image[i*shape[0]:(i+1)*shape[0], j*shape[1]:(j+1)*shape[1]] = \
             img[0, :, :]
     return image
-
-
-def make_trainable(net, val):
-    ''' Make the layers in the model trainable or non-trainable '''
-    net.trainable = val
-    for l in net.layers:
-        l.trainable = val
 
