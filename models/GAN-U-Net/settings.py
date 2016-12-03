@@ -3,8 +3,9 @@ random_seed = 1337
 dropout_rate = 0.1
 
 learning_rate = 1e-5
+learning_rate = 0.01
 
-batch_size = 32
+batch_size = 16
 
 num_kernels = 64
 
@@ -31,7 +32,10 @@ relu_alpha = 0.2 # for LeakyReLU
 dropout_probability = 0.5
 
 loss = 'dice_coef_loss'
+loss = 'binary_crossentropy'
 
 optimizer = 'adam'
 
 metrics = ['dice_coef']
+metrics = ['accuracy']
+
