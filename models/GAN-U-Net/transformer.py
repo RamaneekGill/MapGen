@@ -39,9 +39,6 @@ def save_magnitudes(inputdir, outputdir):
             # plt.xticks([])
             # plt.yticks([])
             # plt.show()
-        else:
-            img = Image.fromarray(np.array(Image.open(filename).convert("RGB"))).convert("RGB")
-            img.save(os.path.join(outputdir, fn[i]))
 
 
 def save_canny_dector(inputdir, outputdir):
@@ -68,9 +65,6 @@ def save_canny_dector(inputdir, outputdir):
             # plt.xticks([])
             # plt.yticks([])
             # plt.show()
-        else:
-            img = Image.fromarray(np.array(Image.open(filename).convert("RGB"))).convert("RGB")
-            img.save(os.path.join(outputdir, fn[i]))
 
 def save_k_cluster(inputdir, outputdir):
     fn = os.listdir(inputdir)
@@ -105,18 +99,9 @@ def save_k_cluster(inputdir, outputdir):
             # plt.xticks([])
             # plt.yticks([])
             # plt.show()
-        else:
-            img = Image.fromarray(np.array(Image.open(filename).convert("RGB"))).convert("RGB")
-            img.save(os.path.join(outputdir, fn[i]))
 
-def save_harrison_corner(inputdir, outputdir):
-    pass
-
-def save_sift(inputdir, outputdir):
-    pass
-
-save_magnitudes('../../data/raw/', '../../data/transformed/magnitude')
-save_canny_dector('../../data/raw/', '../../data/transformed/canny detector')
-save_k_cluster('../../data/raw/', '../../data/transformed/k-cluster')
+# save_magnitudes('../../data/raw/', '../../data/transformed/magnitude')
+# save_canny_dector('../../data/raw/', '../../data/transformed/canny detector')
+# save_k_cluster('../../data/raw/', '../../data/transformed/k-cluster')
 
 
